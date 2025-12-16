@@ -20,6 +20,18 @@ class UserResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    // TRADUCCIONES
+    public static function getModelLabel(): string
+    {
+        return __('User'); // Faltaba agregar esta key al JSON?
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Users');
+    }
+    // FIN TRADUCCIONES
+
     public static function form(Schema $schema): Schema
     {
         return UserForm::configure($schema);

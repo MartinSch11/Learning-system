@@ -22,6 +22,18 @@ class PaymentResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'id';
 
+    // TRADUCCIONES
+    public static function getModelLabel(): string
+    {
+        return __('Payment');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Payments');
+    }
+    // FIN TRADUCCIONES
+
     public static function form(Schema $schema): Schema
     {
         return PaymentForm::configure($schema);

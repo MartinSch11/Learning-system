@@ -13,31 +13,31 @@ class EnrollmentForm
         return $schema
             ->components([
                 Select::make('student_id')
-                    ->label('Alumno')
+                    ->label(__('Student'))
                     ->relationship('student', 'name')
                     ->searchable()
                     ->preload()
                     ->required(),
 
                 Select::make('course_id')
-                    ->label('Curso')
+                    ->label(__('Course'))
                     ->relationship('course', 'name')
                     ->searchable()
                     ->preload()
                     ->required(),
 
                 TextInput::make('year')
-                    ->label('Año')
+                    ->label(__('Academic Year')) // "Año" queda mejor como "Ciclo Lectivo"
                     ->numeric()
                     ->default(date('Y'))
                     ->required(),
 
                 Select::make('status')
-                    ->label('Estado')
+                    ->label(__('Status'))
                     ->options([
-                        'cursando' => 'Cursando',
-                        'aprobado' => 'Aprobado',
-                        'libre' => 'Libre',
+                        'cursando' => __('Studying'),
+                        'aprobado' => __('Approved'),
+                        'libre' => __('Regularity Lost'), // "Libre" en inglés técnico
                     ])
                     ->default('cursando')
                     ->required(),

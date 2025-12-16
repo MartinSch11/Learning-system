@@ -3,76 +3,67 @@
 namespace App\Filament\Resources\Payments\Schemas;
 
 use App\Models\Course;
-use App\Models\Student;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 
 class PaymentForm
 {
-    public static function configure($schema) 
+    public static function configure($schema)
     {
         return $schema
             ->schema([
-                // 1. ALUMNO (Trigger)
+                // 1. ALUMNO
                 Select::make('student_id')
-                    ->label('Alumno')
+                    ->label(__('Student')) // <--- Key
                     ->relationship('student', 'name')
                     ->searchable()
                     ->preload()
                     ->required()
-                    ->live() 
-                    // QUITAMOS "Set" antes de $set. Dejamos solo function ($set, $state)
+                    ->live()
                     ->afterStateUpdated(function ($set, $state) {
-                        // Tu lógica futura...
-                        /* try {
-                             // Lógica de Enrollment...
-                        } catch (\Exception $e) {}
-                        */
+                        // Tu lógica...
                     }),
 
-                // 2. CURSO (Receptivo y Trigger de Precio)
+                // 2. CURSO
                 Select::make('course_id')
-                    ->label('Curso')
+                    ->label(__('Course')) // <--- Key
                     ->relationship('course', 'name')
                     ->searchable()
                     ->preload()
                     ->required()
-                    ->live() 
-                    // QUITAMOS "Set" antes de $set.
+                    ->live()
                     ->afterStateUpdated(function ($set, $state) {
                         if (!$state) {
                             $set('amount', null);
                             return;
                         }
-                        
-                        // Busca el curso en la BD y sacamos el precio
                         $course = Course::find($state);
                         if ($course) {
                             $set('amount', $course->price);
                         }
                     }),
 
-                // 3. MONTO (Resultado)
+                // 3. MONTO
                 TextInput::make('amount')
-                    ->label('Monto ($)')
+                    ->label(__('Amount')) // <--- Key
                     ->required()
                     ->numeric()
                     ->prefix('$'),
 
                 // Fecha
                 DatePicker::make('payment_date')
-                    ->label('Fecha de Pago')
+                    ->label(__('Payment Date')) // <--- Key
                     ->required()
                     ->default(now()),
 
                 // Método
                 Select::make('method')
-                    ->label('Método de Pago')
+                    ->label(__('Payment Method')) // <--- Key
                     ->options([
-                        'efectivo' => 'Efectivo',
-                        'transferencia' => 'Transferencia',
-                        'mercadopago' => 'MercadoPago'
+                        'efectivo' => __('Cash'),           // <--- Traducción de valores
+                        'transferencia' => __('Transfer'),
+                        'mercadopago' => 'MercadoPago'      // Nombre propio, no se traduce
                     ])
                     ->default('efectivo')
                     ->required(),

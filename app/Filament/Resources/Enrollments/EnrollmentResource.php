@@ -20,6 +20,18 @@ class EnrollmentResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    // TRADUCCIONES
+    public static function getModelLabel(): string
+    {
+        return __('Enrollment');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Enrollments');
+    }
+    // FIN TRADUCCIONES
+
     public static function form(Schema $schema): Schema
     {
         return EnrollmentForm::configure($schema);
@@ -45,6 +57,4 @@ class EnrollmentResource extends Resource
             'edit' => EditEnrollment::route('/{record}/edit'),
         ];
     }
-
-    
 }

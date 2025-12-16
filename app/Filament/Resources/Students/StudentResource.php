@@ -21,6 +21,16 @@ class StudentResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static ?string $recordTitleAttribute = 'name';
+    
+    public static function getModelLabel(): string
+    {
+        return __('Student'); // O retorná "Alumno" directo si no vas a usar inglés
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Students'); // O "Alumnos"
+    }
 
     public static function form(Schema $schema): Schema
     {
