@@ -7,6 +7,9 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Forms\Components\Toggle;
 use App\Models\Enrollment;
 use Illuminate\Database\Eloquent\Collection;
 use Filament\Actions\BulkAction;
@@ -16,6 +19,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use App\Models\Course;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Filters\TernaryFilter;
 
 class StudentsTable
 {
@@ -24,82 +28,129 @@ class StudentsTable
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->label(__('Full Name'))
                     ->searchable(),
+
                 TextColumn::make('dni')
+                    ->label(__('National ID'))
                     ->searchable(),
+
                 TextColumn::make('birth_date')
-                    ->date()
+                    ->label(__('Birth Date'))
+                    ->date('d/m/Y')
                     ->sortable(),
+
                 TextColumn::make('phone')
+                    ->label(__('Phone Number'))
                     ->searchable(),
+
                 IconColumn::make('active')
+                    ->label(__('Active'))
                     ->boolean(),
+
                 TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
+                    ->label(__('Created At'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('course')
-                    ->label('Filtrar por Curso')
+                    ->label(__('Filter by Course'))
                     ->schema([
-                        Select::make('course_id') // Usamos un Select manual
-                            ->label('Curso')
+                        Select::make('course_id')
+                            ->label(__('Course'))
                             ->options(Course::pluck('name', 'id'))
                             ->searchable()
                     ])
                     ->query(function (Builder $query, array $data) {
-                        // Si no eligió nada, no filtramos
                         if (empty($data['course_id'])) {
                             return $query;
                         }
-
-                        // MAGIA: Filtramos alumnos que tengan (whereHas) una inscripción en ese curso
                         return $query->whereHas('enrollments', function (Builder $q) use ($data) {
                             $q->where('course_id', $data['course_id']);
-                            // Opcional: ->where('status', 'cursando'); si solo querés los actuales
                         });
                     }),
+
+                TernaryFilter::make('active')
+                    ->label(__('Active'))
+                    ->boolean()
+                    ->trueLabel(__('Active Only'))    // Solo los activos
+                    ->falseLabel(__('Inactive Only')) // Solo los inactivos
+                    ->placeholder(__('All')),         // Todos (borra el filtro)
             ])
             ->recordActions([
                 EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+
                     BulkAction::make('promocionar')
-                        ->label('Inscribir en Nuevo Ciclo')
+                        ->label(__('Enroll in New Cycle'))
                         ->icon('heroicon-o-arrow-path')
                         ->color('success')
                         ->requiresConfirmation()
-                        ->modalHeading('Inscripción Masiva')
+                        ->modalHeading(__('Mass Enrollment'))
                         ->schema([
+                            // --- SECCIÓN NUEVA INSCRIPCIÓN ---
                             Select::make('course_id')
-                                ->label('Inscribir en Curso')
-                                ->options(Course::query()->pluck('name', 'id'))
-                                ->required(),
+                                ->label(__('Enroll in Course'))
+                                ->options(\App\Models\Course::query()->pluck('name', 'id'))
+                                ->required()
+                                ->searchable(),
 
                             TextInput::make('year')
-                                ->label('Ciclo Lectivo')
+                                ->label(__('Academic Year'))
                                 ->numeric()
                                 ->default(now()->year + 1)
                                 ->required(),
+
+                            // --- SECCIÓN CIERRE DE CURSADA ANTERIOR ---
+                            Section::make('Cierre de Cursada Anterior')
+                                ->schema([
+                                    Toggle::make('close_previous')
+                                        ->label('¿Finalizar cursadas anteriores?')
+                                        ->default(true)
+                                        ->live(), // Importante para que el Select de abajo reaccione
+
+                                    Select::make('previous_status')
+                                        ->label('Estado Final')
+                                        ->options([
+                                            'aprobado' => __('Approved'),   // Pasó de nivel
+                                            'reprobado' => __('Failed'),    // Tiene que recursar (en vez de Libre)
+                                        ])
+                                        ->default('aprobado')
+                                        // CORRECCIÓN: La clase Get correcta
+                                        ->visible(fn(Get $get) => $get('close_previous'))
+                                        ->required(),
+                                ])
+                                ->compact(),
                         ])
                         ->action(function (Collection $records, array $data) {
                             foreach ($records as $student) {
-                                Enrollment::create([
+                                // 1. PASO PREVIO: Cerrar cursada anterior
+                                if ($data['close_previous']) {
+                                    $student->enrollments()
+                                        ->where('status', 'cursando')
+                                        ->where('year', '<', $data['year']) // Solo años viejos
+                                        ->update([
+                                            'status' => $data['previous_status']
+                                        ]);
+                                }
+
+                                // 2. PASO ACTUAL: Crear nueva inscripción
+                                // firstOrCreate evita duplicados EXACTOS (mismo alumno, curso y año)
+                                \App\Models\Enrollment::firstOrCreate([
                                     'student_id' => $student->id,
-                                    'course_id' => $data['course_id'],
-                                    'year' => $data['year'],
-                                    'status' => 'cursando',
+                                    'course_id'  => $data['course_id'],
+                                    'year'       => $data['year'],
+                                ], [
+                                    'status' => 'inscripto', // Arranca como inscripto
                                 ]);
                             }
 
                             Notification::make()
-                                ->title('Inscripciones realizadas con éxito')
+                                ->title(__('Enrollments created successfully'))
                                 ->success()
                                 ->send();
                         })

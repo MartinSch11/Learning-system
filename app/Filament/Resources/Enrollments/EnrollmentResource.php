@@ -13,12 +13,20 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class EnrollmentResource extends Resource
 {
     protected static ?string $model = Enrollment::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Management');
+    }
+    
+    protected static ?int $navigationSort = 2;
 
     // TRADUCCIONES
     public static function getModelLabel(): string

@@ -18,7 +18,6 @@ class DatabaseSeeder extends Seeder
     {
         $roleAdmin = Role::create(['name' => 'admin']);
         $roleTeacher = Role::create(['name' => 'teacher']);
-        $roleParent = Role::create(['name' => 'parent']);
         $roleStudent = Role::create(['name' => 'student']);
     }
 }

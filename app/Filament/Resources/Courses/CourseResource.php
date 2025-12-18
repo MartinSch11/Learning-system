@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class CourseResource extends Resource
 {
@@ -20,8 +21,15 @@ class CourseResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static ?string $recordTitleAttribute = 'name';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Academic');
+    }
     
+    protected static ?int $navigationSort = 1; // Primero Cursos
+
+    protected static ?string $recordTitleAttribute = 'name';
+
     // TRADUCCIONES
     public static function getModelLabel(): string
     {

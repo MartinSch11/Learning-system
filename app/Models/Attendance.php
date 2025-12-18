@@ -3,24 +3,22 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Attendance extends Model
 {
     protected $fillable = [
         'class_session_id',
         'student_id',
-        'status', // 'present', 'absent', 'late', 'excused'
-        'notes',  // "Se retiró antes", "Trajo certificado médico"
+        'is_present',
+        'is_justified'
     ];
 
-    public function classSession(): BelongsTo
-    {
-        return $this->belongsTo(ClassSession::class);
-    }
-
-    public function student(): BelongsTo
+    public function student()
     {
         return $this->belongsTo(Student::class);
+    }
+    public function classSession()
+    {
+        return $this->belongsTo(ClassSession::class);
     }
 }

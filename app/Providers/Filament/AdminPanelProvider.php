@@ -27,6 +27,9 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->topNavigation()
+            ->brandName('Learning System')
+            ->favicon(asset('/autogestionugd/public/images/favicon.png'))
             ->login()
             ->colors([
                 'primary' => Color::Amber,
@@ -38,8 +41,18 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
-                AccountWidget::class,
-                FilamentInfoWidget::class,
+                // AccountWidget::class,
+                // FilamentInfoWidget::class,
+            ])
+            ->navigationGroups([
+                'Academic', // Aparece primero
+                'Management',
+                'Finance',
+                'System',
+                'Académico', // Por si queda alguno en español
+                'Gestión',
+                'Finanzas',
+                'Sistema',
             ])
             ->middleware([
                 EncryptCookies::class,

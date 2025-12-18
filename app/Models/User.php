@@ -7,8 +7,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
+use Filament\Panel;
+use Filament\Models\Contracts\FilamentUser;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasRoles;
@@ -53,10 +55,20 @@ class User extends Authenticatable
         return $this->hasOne(Student::class);
     }
 
-    // Relación para saber qué hijos tiene este usuario (si es padre)
-    public function children()
+    public function canAccessPanel(Panel $panel): bool
     {
-        return $this->belongsToMany(Student::class, 'student_user')
-            ->withPivot('relationship');
+        // 1. Si intenta entrar al panel 'admin'
+        if ($panel->getId() === 'admin') {
+            // Solo admins y teachers pasan
+            return $this->hasRole(['admin', 'teacher']);
+        }
+
+        // 2. Si intenta entrar al panel 'student'
+        if ($panel->getId() === 'student') {
+            // Solo students (y si querés que el admin pueda chusmear, agregalo)
+            return $this->hasRole(['student', 'admin']);
+        }
+
+        return false;
     }
 }

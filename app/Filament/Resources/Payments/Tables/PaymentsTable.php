@@ -14,44 +14,43 @@ class PaymentsTable
     {
         return $table
             ->columns([
-                // CAMBIO 1: Usamos 'student.name' en vez de 'student_id'
                 TextColumn::make('student.name')
-                    ->label('Alumno') // Etiqueta bonita para la cabecera
+                    ->label(__('Student'))
                     ->sortable()
-                    ->searchable(), // ¡Vital! Permite buscar pagos escribiendo el nombre del alumno
+                    ->searchable(),
 
-                // CAMBIO 2: Usamos 'course.name'
                 TextColumn::make('course.name')
-                    ->label('Curso')
+                    ->label(__('Course'))
                     ->sortable()
                     ->searchable(),
 
                 TextColumn::make('amount')
-                    ->label('Monto')
-                    ->money('ARS') // Tip Senior: Esto lo formatea como moneda ($ 25.000,00)
+                    ->label(__('Amount'))
+                    ->money('ARS')
                     ->sortable(),
 
                 TextColumn::make('payment_date')
-                    ->label('Fecha')
-                    ->date('d/m/Y') // Formato argentino
+                    ->label(__('Payment Date'))
+                    ->date('d/m/Y')
                     ->sortable(),
 
                 TextColumn::make('method')
-                    ->label('Método')
-                    ->badge() // Queda lindo como etiqueta de color
-                    ->color(fn (string $state): string => match ($state) {
-                        'efectivo' => 'success', // Verde
-                        'transferencia' => 'info', // Azul
-                        'mercadopago' => 'warning', // Amarillo
+                    ->label(__('Payment Method'))
+                    ->badge()
+                    ->formatStateUsing(fn(string $state): string => match ($state) {
+                        'efectivo' => __('Cash'),
+                        'transferencia' => __('Transfer'),
+                        default => ucfirst($state), // MercadoPago queda igual
+                    })
+                    ->color(fn(string $state): string => match ($state) {
+                        'efectivo' => 'success',
+                        'transferencia' => 'info',
+                        'mercadopago' => 'warning',
                         default => 'gray',
                     }),
 
                 TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                    
-                TextColumn::make('updated_at')
+                    ->label(__('Created At'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

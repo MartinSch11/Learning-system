@@ -17,12 +17,12 @@ class StudentForm
             ->components([
 
                 // SECCIÓN 1
-                Section::make(__('Student Information')) // <--- Usamos __()
+                Section::make(__('Student Information'))
                     ->icon('heroicon-m-academic-cap')
                     ->columns(2)
                     ->schema([
                         TextInput::make('name')
-                            ->label(__('Full Name')) // <--- Clave en inglés
+                            ->label(__('Full Name'))
                             ->required(),
 
                         TextInput::make('dni')

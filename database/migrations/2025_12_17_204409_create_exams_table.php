@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('class_sessions', function (Blueprint $table) {
+        Schema::create('exams', function (Blueprint $table) {
             $table->id();
             $table->foreignId('course_id')->constrained()->cascadeOnDelete();
-            // Asumimos que el docente es un User, o podés tener una tabla teachers
-            $table->foreignId('teacher_id')->constrained('users');
-            $table->dateTime('start_time'); // "2025-10-15 18:00:00"
+            $table->string('title'); // Ej: "Midterm Exam", "Final Oral"
+            $table->date('date');
+            $table->text('description')->nullable();
+            $table->integer('max_score')->default(100); // Para saber si es sobre 10 o 100
             $table->timestamps();
         });
     }
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('class_sessions');
+        Schema::dropIfExists('exams');
     }
 };

@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('attendances', function (Blueprint $table) {
+        Schema::create('exam_grades', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('class_session_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('exam_id')->constrained()->cascadeOnDelete();
             $table->foreignId('student_id')->constrained()->cascadeOnDelete();
-
-            // Tus dos toggles
-            $table->boolean('is_present')->default(false);
-            $table->boolean('is_justified')->default(false);
-
+            $table->decimal('score', 5, 2)->nullable(); // Nota numérica
+            $table->text('feedback')->nullable(); // Comentarios del profe
             $table->timestamps();
+
+            // Evitar que un alumno tenga 2 notas en el mismo examen
+            $table->unique(['exam_id', 'student_id']);
         });
     }
 
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('attendances');
+        Schema::dropIfExists('exam_grades');
     }
 };
